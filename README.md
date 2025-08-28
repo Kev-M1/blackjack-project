@@ -1,7 +1,7 @@
 
 # 📝 Descripción del Proyecto
 
-Este proyecto es una implementación del popular juego de cartas **Blackjack**, creada para consolidar mis habilidades en **JavaScript** y el desarrollo frontend.
+Este proyecto es una implementación del popular juego de cartas **Blackjack**, creada para consolidar mis habilidades en particular **JavaScript** y el desarrollo **Frontend** en general.
 
 ---
 

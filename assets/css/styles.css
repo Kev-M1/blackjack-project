@@ -8,7 +8,7 @@
 html,
 body {
   height: 100%;
-  font-size: 62.5%;
+  font-size: 62.5%; /* 1rem = 10px */
   font-family: sans-serif;
   line-height: 1.25;
   -webkit-font-smoothing: antialiased;
@@ -55,13 +55,30 @@ body {
 }
 
 .card {
-  width: 15rem;
-  height: 25rem;
+  width: 12rem;
+  height: 20rem;
   border-radius: 1rem;
   display: inline-block;
-  margin-left: -8rem;
+  margin-left: -7rem;
 
   position: relative;
   left: 8rem;
   cursor: pointer;
+}
+
+@media (min-width: 768px) {
+  .tittle-container {
+    font-size: 3rem;
+  }
+
+  .buttons-container button {
+    font-size: 2rem;
+  }
+
+  .card {
+    width: 15rem;
+    height: 25rem;
+    margin-left: -8rem;
+    left: 8rem;
+  }
 }
