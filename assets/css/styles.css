@@ -66,6 +66,15 @@ body {
   cursor: pointer;
 }
 
+@media (max-width: 450px) {
+  .card {
+    width: 9.5rem;
+    height: 18rem;
+    margin-left: -7rem;
+    left: 8rem;
+  }
+}
+
 @media (min-width: 768px) {
   .tittle-container {
     font-size: 3rem;
