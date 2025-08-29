@@ -63,7 +63,7 @@ const assignValues = (card) => {
 //IA logic (PC-Turn)
 const pcTurn = (playerPoints) => {
 
-  while (pcPointsAcum < playerPoints) {
+  while (pcPointsAcum < 17) {
     let card = pickCard();
     let cardPoints = assignValues(card);
 
@@ -84,24 +84,22 @@ const pcTurn = (playerPoints) => {
     }
   }
 
-  determineWinner();
+  setTimeout(() => {
+    determineWinner();
+  }, 500);
 };
 
 //Determine the winner
 const determineWinner = () => {
   if (playerPointsAcum > 21) {
-    alert('Perdiste, te pasaste de 21, gana la PC');
+    alert('¡Perdiste! Te pasaste de 21.');
   } else if (pcPointsAcum > 21) {
-    alert('Ganaste!, la maquina se paso de 21');
-  }
-
-  if ((playerPointsAcum > pcPointsAcum) && (playerPointsAcum <= 21)) {
-    alert('Ganaste!');
-  } else if ((pcPointsAcum > playerPointsAcum) && (pcPointsAcum <= 21)) {
-    alert('Gana el PC!');
-  }
-
-  if (playerPointsAcum === pcPointsAcum) {
+    alert('¡Ganaste! La PC se pasó de 21.');
+  } else if (playerPointsAcum > pcPointsAcum) {
+    alert('¡Ganaste! Tu puntaje es mayor.');
+  } else if (pcPointsAcum > playerPointsAcum) {
+    alert('¡Perdiste! La PC tiene un puntaje mayor.');
+  } else {
     alert('Empate');
   }
 };
@@ -128,10 +126,12 @@ btnAskForCard.addEventListener('click', (event) => {
 
 
   if (playerPointsAcum > 21) {
-    btnAskForCard.disabled = true;
-    btnStop.disabled = true;
+    btnAskForCard.disabled = 'true';
+    btnStop.disabled = 'true';
     pcTurn(playerPointsAcum);
   } else if (playerPointsAcum === 21) {
+    btnAskForCard.disabled = 'true';
+    btnStop.disabled = 'true';
     pcTurn(playerPointsAcum);
   }
 })
@@ -149,8 +149,8 @@ btnNewGame.addEventListener('click', (event) => {
   fillAndShuffleDeck();
   playerPointsAcum = 0;
   pcPointsAcum = 0;
-  pcScore.textContent = ``;
-  playerScore.textContent = ``;
+  pcScore.textContent = `0`;
+  playerScore.textContent = `0`;
   btnStop.removeAttribute('disabled');
   btnAskForCard.removeAttribute('disabled');
   playerCards.innerHTML = ``;
@@ -175,7 +175,6 @@ const main = async () => {
   }
 };
 main();
-
 
 
 
