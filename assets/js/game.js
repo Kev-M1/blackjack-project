@@ -1,189 +1,189 @@
-//Global variables
-let deck = [];
-const deckGroups = ['H', 'S', 'C', 'D'];
-const specialCards = ['A', 'Q', 'K', 'J'];
-let playerPointsAcum = 0;
-let pcPointsAcum = 0;
+const blackjackModule = (() => {
+  'use strict';
 
 
-//HTML Elements
-const btnNewGame = document.querySelector('#btnNewGame');
-const btnAskForCard = document.querySelector('#btnAskForCard');
-const btnStop = document.querySelector('#btnStop');
-const playerScore = document.querySelector('#playerScore');
-const playerCards = document.querySelector('#playerCards');
-const pcScore = document.querySelector('#pcScore');
-const pcCards = document.querySelector('#pcCards');
+  /*=============================================
+  =         Global stuff of the module          =
+  =============================================*/
+  let deck = [],
+    deckGroups = ['H', 'D', 'S', 'C'], //13 Card per group
+    specialCards = ['A', 'K', 'Q', 'J'],
+    pointsAccumOfAllPlayers = [];
 
 
-//Fill deck
-const fillAndShuffleDeck = () => {
-  for (let i = 2; i <= 10; i++) {
-    for (const group of deckGroups) {
-      deck.push(i + group);
+  //HTML ELEMENTS
+  const btnNewGame = document.querySelector("#btnNewGame"),
+    btnAskForCard = document.querySelector("#btnAskForCard"),
+    btnStop = document.querySelector('#btnStop'),
+    scoreTags = document.querySelectorAll('.score'),
+    cardsDivs = document.querySelectorAll('.cards-div');
+  /*=====  End of global stuff  ======*/
+
+  //function for initialize accumulators
+  //This function initializes an accumulator within the array for each player that is going to play
+  const initializeAccumulators = (numberOfPlayers = 2) => {
+    pointsAccumOfAllPlayers = [];
+    for (let i = 0; i < numberOfPlayers; i++) {
+      pointsAccumOfAllPlayers.push(0);
     }
-  }
+    return pointsAccumOfAllPlayers;
+  };
 
-  for (const specialCard of specialCards) {
-    for (const group of deckGroups) {
-      deck.push(specialCard + group);
+  //function for fill deck with cards
+  const createCardsAndFillDeck = () => {
+
+    for (let i = 2; i <= 10; i++) {
+      for (const group of deckGroups) {
+        deck.push(i + group);
+      }
+    };
+
+    for (const specialCard of specialCards) {
+      for (const group of deckGroups) {
+        deck.push(specialCard + group);
+      }
+    };
+
+    return _.shuffle(deck);
+  };
+
+  //function for pick each card from deck
+  const pickCard = () => {
+    return deck.pop();
+  };
+
+  //function for assign points to each card 
+  const assignsPointsToCard = (card) => {
+    let cardValue = card.substring(0, (card.length - 1));
+    let points;
+
+    if (specialCards.includes(cardValue)) {
+      (cardValue === 'A') ? points = 11 : points = 10;
+    } else {
+      cardValue = (cardValue * 1);
+      points = cardValue;
     }
+
+    console.log({ card }, { cardValue }, { points });
+
+    return points;
+  };
+
+  //function for accumulate points of each player
+  const accumulatePoints = (accumIndex, cardPoints, scoreIndex) => {
+    pointsAccumOfAllPlayers[accumIndex] = (pointsAccumOfAllPlayers[accumIndex] + cardPoints);
+    //render info
+    scoreTags[scoreIndex].textContent = `${pointsAccumOfAllPlayers[accumIndex]}`;
   }
 
-  deck = _.shuffle(deck);
-  return deck
-};
+  //function for render cards img of each player
+  const renderCardsImg = (cardsDivsIndex, card) => {
+    cardsDivs[cardsDivsIndex].innerHTML += `<img class="card" src="assets/cards/${card}.png" alt="card">`;
+  };
 
-//Pick card
-const pickCard = () => {
-  return deck.pop();
-}
+  //function for disabled buttons
+  const disableButtons = () => {
+    btnAskForCard.disabled = true;
+    btnStop.disabled = true;
+  };
 
-//Assign value (points) to each card
-const assignValues = (card) => {
-  let cardTaken = card.substring(0, (card.length - 1));
-  let points;
-
-  if (specialCards.includes(cardTaken)) {
-    (cardTaken === 'A') ? points = 11 : points = 10;
-  } else {
-    cardTaken = (cardTaken * 1);
-    points = cardTaken;
+  const enableButtons = () => {
+    btnAskForCard.disabled = false;
+    btnStop.disabled = false;
   }
 
-  // console.log(`
-  //   Carta tomada: ${card}
-  //   Puntos: ${points}
-  //   `);
-
-  return points;
-};
-
-
-//IA logic (PC-Turn)
-const pcTurn = (playerPoints) => {
-
-  while (pcPointsAcum < 17) {
-    let card = pickCard();
-    let cardPoints = assignValues(card);
-
-    pcPointsAcum = (pcPointsAcum + cardPoints);
-
-    pcScore.textContent = `${pcPointsAcum}`;
-
-    let imgCard = document.createElement('img');
-    imgCard.src = `assets/cards/${card}.png`;
-    imgCard.className = `card`;
-
-
-    pcCards.append(imgCard);
-
-
-    if (playerPoints > 21) {
-      break;
+  //IA LOGIC (PC TURN)
+  const pcTurn = (playerPoints) => {
+    while (pointsAccumOfAllPlayers[pointsAccumOfAllPlayers.length - 1] < 17) {
+      let card = pickCard();
+      let cardPoints = assignsPointsToCard(card);
+      accumulatePoints((pointsAccumOfAllPlayers.length - 1), cardPoints, (scoreTags.length - 1));
+      renderCardsImg((cardsDivs.length - 1), card);
     }
-  }
 
-  setTimeout(() => {
     determineWinner();
-  }, 500);
-};
+  };
 
-//Determine the winner
-const determineWinner = () => {
-  if (playerPointsAcum > 21) {
-    alert('¡Perdiste! Te pasaste de 21.');
-  } else if (pcPointsAcum > 21) {
-    alert('¡Ganaste! La PC se pasó de 21.');
-  } else if (playerPointsAcum > pcPointsAcum) {
-    alert('¡Ganaste! Tu puntaje es mayor.');
-  } else if (pcPointsAcum > playerPointsAcum) {
-    alert('¡Perdiste! La PC tiene un puntaje mayor.');
-  } else {
-    alert('Empate');
-  }
-};
+  //function for determine the winner
+  const determineWinner = () => {
+    let totalPointsPlayer, totalPointsPc;
+    [totalPointsPlayer, totalPointsPc] = pointsAccumOfAllPlayers;
 
+    if (totalPointsPlayer > 21) {
+      alert(`
+      Pierdes!! Te pasaste de 21, gana la PC
+      Puntaje jugador: ${totalPointsPlayer}
+      Puntaje PC: ${totalPointsPc}
+      `);
+    } else if (totalPointsPc > 21) {
+      alert(`
+      Ganaste!! el PC se paso de 21
+      Puntaje jugador: ${totalPointsPlayer}
+      Puntaje PC: ${totalPointsPc}`);
+    } else if (totalPointsPlayer > totalPointsPc) {
+      alert(`
+      Ganaste!!
+      Puntaje jugador: ${totalPointsPlayer}
+      Puntaje PC: ${totalPointsPc}`);
+    } else if (totalPointsPc > totalPointsPlayer) {
+      alert(`
+      Perdiste!!
+      Puntaje jugador: ${totalPointsPlayer}
+      Puntaje PC: ${totalPointsPc}`);
+    } else {
+      alert(`
+      Empate!!
+      Puntaje jugador: ${totalPointsPlayer}
+      Puntaje PC: ${totalPointsPc}`);
+    }
+  };
 
+  //function for restart html values 
+  const restartHTMLValues = () => {
+    scoreTags.forEach(tag => {
+      tag.innerHTML = ``;
+    });
 
-//Events
-//Ask for a card
-btnAskForCard.addEventListener('click', (event) => {
-  let card = pickCard();
-  let cardPoints = assignValues(card);
+    cardsDivs.forEach(tag => {
+      tag.innerHTML = ``;
+    });
+  };
 
-  playerPointsAcum = (playerPointsAcum + cardPoints);
+  /*=============================================
+  =            EVENTS            =
+  =============================================*/
+  //Button ask for a card
+  btnAskForCard.addEventListener('click', (event) => {
+    let card = pickCard();
+    let cardPoints = assignsPointsToCard(card);
+    accumulatePoints(0, cardPoints, 0);
+    renderCardsImg(0, card);
 
-  playerScore.textContent = `${playerPointsAcum}`;
+    if (pointsAccumOfAllPlayers[0] > 21) {
+      disableButtons();
+      pcTurn(pointsAccumOfAllPlayers[0]);
+    }
+  })
 
+  //Button stop gamme
+  btnStop.addEventListener('click', (event) => {
+    disableButtons();
+    pcTurn();
+  })
 
-  let imgCard = document.createElement('img');
-  imgCard.src = `assets/cards/${card}.png`;
-  imgCard.className = `card`;
+  //button New game
+  btnNewGame.addEventListener('click', (event) => {
+    startGame();
+  });
 
-
-  playerCards.append(imgCard);
-
-
-  if (playerPointsAcum > 21) {
-    btnAskForCard.disabled = 'true';
-    btnStop.disabled = 'true';
-    pcTurn(playerPointsAcum);
-  } else if (playerPointsAcum === 21) {
-    btnAskForCard.disabled = 'true';
-    btnStop.disabled = 'true';
-    pcTurn(playerPointsAcum);
-  }
-})
-
-//Stop button
-btnStop.addEventListener('click', (event) => {
-  btnAskForCard.disabled = 'true';
-  btnStop.disabled = 'true';
-  pcTurn(playerPointsAcum);
-})
-
-//New-game button
-btnNewGame.addEventListener('click', (event) => {
-  deck = [];
-  fillAndShuffleDeck();
-  playerPointsAcum = 0;
-  pcPointsAcum = 0;
-  pcScore.textContent = `0`;
-  playerScore.textContent = `0`;
-  btnStop.removeAttribute('disabled');
-  btnAskForCard.removeAttribute('disabled');
-  playerCards.innerHTML = ``;
-  pcCards.innerHTML = ``;
-
-})
-
-
-
-
-
-
+  /*=====  End of EVENTS  ======*/
 
 
-
-const main = async () => {
-  try {
-    fillAndShuffleDeck();
-
-  } catch (error) {
-
-  }
-};
-main();
-
-
-
-
-
-
-
-
-
-
-
-
+  const startGame = () => {
+    enableButtons();
+    deck = createCardsAndFillDeck();
+    pointsAccumOfAllPlayers = initializeAccumulators();
+    restartHTMLValues();
+  };
+  startGame();
+})();
